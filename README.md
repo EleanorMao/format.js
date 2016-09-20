@@ -37,14 +37,17 @@ commonJS
     - format[String] %v = value %s = symber
     - decimal[String] decimal separator, default is '.'
 
-* format.parse(value, decimal)
+* format.parse(value, decimal, unit)
     - value[Number | String | Array]
     - decimal[String]
+    - unit[Number]
     ```
       format.parse('1,000')
       //1000
       format.parse('1,000%', '%')
       //1000
+      format.parse('1,000', null, 100)
+      //100000
     ```
 * format.format(value, precision, format, symbol, unit, separator, decimal) ||  format.parse(value, settings)
     - value[Number | Array]
