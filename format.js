@@ -14,7 +14,6 @@
     lib.settings = {
         unit: 1,
         symbol: '',
-        suffix: '%',
         decimal: '.',
         precision: 2,
         separator: ',',
@@ -44,14 +43,18 @@
         return obj;
     };
 
-    var parse = lib.parse = function(value, decimal) {
+    var parse = lib.parse = function(value, decimal, unit) {
         if (isArray(value)) {
             return value.map(item => {
                 return parse(item);
             })
         }
 
-        if (isNum(value)) return value;
+        unit = unit || lib.settings.unit;
+
+        if (isNum(value)) {
+            return unit === 1 ? value : value * unit;
+        }
 
         decimal = decimal || lib.settings.decimal;
 
@@ -63,7 +66,7 @@
             .replace(decimal, '.')
         )
 
-        return isNaN(unformatted) ? 0 : unformatted;
+        return isNaN(unformatted) ? 0 : unformatted * unit;
     }
 
     var toFixed = lib.toFixed = function(value, precision) {
@@ -91,13 +94,14 @@
             opts = defaults(lib.settings, opts),
             output = '';
 
-        if (opts.format.match("%v")) {
-            var negative = value < 0 ? "-" : "",
-                fixed = toFixed(Math.abs(value) / opts.unit, opts.precision),
-                base = parseInt(fixed, 10) + '',
-                mod = base.length > 3 ? base.length % 3 : 0;
+        var negative = value < 0 ? "-" : "",
+            fixed = toFixed(Math.abs(value) / opts.unit, opts.precision),
+            base = parseInt(fixed, 10) + '',
+            mod = base.length > 3 ? base.length % 3 : 0;
 
-            output = negative + (mod ? base.substr(0, mod) + opts.separator : '') + base.substr(mod).replace(/(\d{3})(?=\d)/g, "$1" + opts.separator) + (opts.precision ? opts.decimal + fixed.split('.')[1] : '');
+        output = negative + (mod ? base.substr(0, mod) + opts.separator : '') + base.substr(mod).replace(/(\d{3})(?=\d)/g, "$1" + opts.separator) + (opts.precision ? opts.decimal + fixed.split('.')[1] : '');
+
+        if (opts.format.match("%v")) {
             output = opts.format.replace('%v', output).replace('%s', opts.symbol);
         }
 
